@@ -26,6 +26,7 @@ use std::path::{Path, PathBuf};
  * THE SOFTWARE.
  */
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 mod error;
 pub use error::{MountInfoError, ParseLineError};
@@ -114,6 +115,9 @@ pub struct MountPoint {
     /// Some additional mount options
     pub options: MountOptions,
 }
+static PROC_MOUNTINFO_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(\d*)\s(\d*)\s(\d*:\d*)\s([\S]*)\s([\S]*)\s([A-Za-z0-9,]*)\s([A-Za-z0-9:\s]*)\s\- ([\S]*)\s([\S]*)(.*)").unwrap()
+});
 
 impl MountPoint {
     /// Creates a new mount point from a line of the `/proc/self/mountinfo` file.
@@ -121,11 +125,10 @@ impl MountPoint {
         // The line format is:
         // <id> <parent_id> <major>:<minor> <root> <mount_point> <mount_options> <optional tags> "-" <fstype> <mount souce> <super options>
         // Ref: https://www.kernel.org/doc/Documentation/filesystems/proc.txt - /proc/<pid>/mountinfo - Information about mounts
-        let re = Regex::new(r"(\d*)\s(\d*)\s(\d*:\d*)\s([\S]*)\s([\S]*)\s([A-Za-z0-9,]*)\s([A-Za-z0-9:\s]*)\s\- ([\S]*)\s([\S]*)(.*)").unwrap();
-        if !re.is_match(line) {
+        if !PROC_MOUNTINFO_LINE_RE.is_match(line) {
             return Err(ParseLineError::InvalidFormat);
         }
-        let caps = re
+        let caps = PROC_MOUNTINFO_LINE_RE
             .captures(line)
             .ok_or(ParseLineError::MissingCaptureGroups)?;
         Ok(MountPoint {

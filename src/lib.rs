@@ -121,7 +121,7 @@ static PROC_MOUNTINFO_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
 
 impl MountPoint {
     /// Creates a new mount point from a line of the `/proc/self/mountinfo` file.
-    fn parse_proc_mountinfo_line(line: &String) -> Result<Self, ParseLineError> {
+    fn parse_proc_mountinfo_line(line: &str) -> Result<Self, ParseLineError> {
         // The line format is:
         // <id> <parent_id> <major>:<minor> <root> <mount_point> <mount_options> <optional tags> "-" <fstype> <mount souce> <super options>
         // Ref: https://www.kernel.org/doc/Documentation/filesystems/proc.txt - /proc/<pid>/mountinfo - Information about mounts
@@ -144,7 +144,7 @@ impl MountPoint {
             ),
             root: Some(PathBuf::from(caps[4].to_string())),
             path: PathBuf::from(caps[5].to_string()),
-            options: MountOptions::new(&caps[6].to_string()),
+            options: MountOptions::new(&caps[6]),
             fstype: FsType::from_str(&caps[8]).unwrap(),
             what: caps[9].to_string(),
         })
@@ -214,11 +214,11 @@ impl MountInfo {
         };
         if Path::new(MountInfo::MTAB_FILE).exists() {
             let mut mtab = File::open(MountInfo::MTAB_FILE)?;
-            return Ok(MountInfo {
+            Ok(MountInfo {
                 mounting_points: MountInfo::parse_mtab(&mut mtab).map_err(MountInfoError::Io)?,
-            });
+            })
         } else {
-            return Err(MountInfoError::NoMountInfoFile);
+            Err(MountInfoError::NoMountInfoFile)
         }
     }
 
@@ -240,14 +240,14 @@ impl MountInfo {
         let path = mounting_point.as_ref();
         self.mounting_points
             .iter()
-            .any(|mts| &mts.path == path && mts.fstype == fstype)
+            .any(|mts| mts.path == path && mts.fstype == fstype)
     }
 
     /// Check if the given path is a mount point.
     pub fn is_mounted<P: AsRef<Path>>(&self, path: P) -> bool {
         self.mounting_points
             .iter()
-            .any(|mts| &mts.path == path.as_ref())
+            .any(|mts| mts.path == path.as_ref())
     }
 
     fn parse_proc_mountinfo(

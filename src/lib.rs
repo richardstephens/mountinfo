@@ -358,4 +358,17 @@ mod test {
         assert_eq!(more_options.read_write, ReadWrite::ReadOnly);
         assert_ne!(more_options.others.len(), 0);
     }
+
+    #[test]
+    fn parse_proc_mountinfo_line() {
+        let line: String = "48 46 253:15 / /boot/efi rw,relatime shared:46 - vfat /dev/vda15 rw,fmask=0077,dmask=0077,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro".into();
+        let mount_point = MountPoint::parse_proc_mountinfo_line(&line).unwrap();
+        assert_eq!(Some(48), mount_point.id);
+        assert_eq!(Some(46), mount_point.parent_id);
+        assert_eq!(Some(PathBuf::from("/")), mount_point.root);
+        assert_eq!(&PathBuf::from("/boot/efi"), &mount_point.path);
+        assert_eq!("/dev/vda15", &mount_point.what);
+        assert_eq!(FsType::Other("vfat".into()), mount_point.fstype);
+        assert_eq!(ReadWrite::ReadWrite, mount_point.options.read_write);
+    }
 }

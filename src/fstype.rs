@@ -48,6 +48,10 @@ pub enum FsType {
     Ext4,
     /// devtmpfs filesystem.
     Devtmpfs,
+    /// EFI variable filesystem. a virtual filesystem describing firmware variables
+    EfiVarFs,
+    /// VFAT filesystem.
+    Vfat,
     /// Other filesystems.
     Other(String),
 }
@@ -66,6 +70,8 @@ impl FromStr for FsType {
             "ext3" => Ok(FsType::Ext3),
             "ext4" => Ok(FsType::Ext4),
             "devtmpfs" => Ok(FsType::Devtmpfs),
+            "efivarfs" => Ok(FsType::EfiVarFs),
+            "vfat" => Ok(FsType::Vfat),
             _ => Ok(FsType::Other(s.to_string())),
         }
     }
@@ -83,6 +89,8 @@ impl fmt::Display for FsType {
             FsType::Ext3 => "ext3",
             FsType::Ext4 => "ext4",
             FsType::Devtmpfs => "devtmpfs",
+            FsType::EfiVarFs => "efivarfs",
+            FsType::Vfat => "vfat",
             FsType::Other(fsname) => fsname,
         };
         write!(f, "{}", fsname)

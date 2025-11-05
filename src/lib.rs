@@ -284,7 +284,7 @@ mod test {
         assert_eq!(Some(PathBuf::from("/")), mount_point.root);
         assert_eq!(&PathBuf::from("/boot/efi"), &mount_point.path);
         assert_eq!("/dev/vda15", &mount_point.what);
-        assert_eq!(FsType::Other("vfat".into()), mount_point.fstype);
+        assert_eq!(FsType::Vfat, mount_point.fstype);
         assert_eq!(ReadWrite::ReadWrite, mount_point.options.read_write);
     }
 }

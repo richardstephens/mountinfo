@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-use mountinfo::{MountInfo, MountPoint, ReadWrite};
+use mountinfo2::{MountInfo, MountPoint, ReadWrite};
 
 fn main() {
     let mtab = MountInfo::new().unwrap();

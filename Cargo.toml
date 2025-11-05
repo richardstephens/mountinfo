@@ -7,7 +7,7 @@ description = "A Rust library for parsing mount points on Linux and other Unix s
 readme = "README.md"
 repository = "https://github.com/richardstephens/mountinfo2"
 license = "MIT"
-keywords = ["mtab", "fstab", "etc", "linux", "filesystem", "mount"]
+keywords = ["mtab", "linux", "filesystem", "mount", "mountinfo"]
 categories = ["filesystem", "os::linux-apis"]
 
 [dependencies]

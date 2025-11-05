@@ -293,32 +293,12 @@ impl MountInfo {
 // unit tests
 #[cfg(test)]
 mod test {
-
     use super::*;
-
-    struct FakeFile {
-        s: String,
-        read: bool,
-    }
-
-    impl io::Read for FakeFile {
-        fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-            if self.read {
-                return Ok(0);
-            }
-            let mut i = 0;
-            while i < self.s.len() {
-                buf[i] = self.s.as_bytes()[i];
-                i += 1;
-            }
-            self.read = true;
-            Ok(buf.len())
-        }
-    }
+    use std::io::Cursor;
 
     #[test]
     fn test_load_mount_points() {
-        let mut file = FakeFile { s: "tmpfs /tmp tmpfs rw,seclabel,nosuid,nodev,size=8026512k,nr_inodes=1048576,inode64 0 0".to_owned(), read: false };
+        let mut file = Cursor::new(b"tmpfs /tmp tmpfs rw,seclabel,nosuid,nodev,size=8026512k,nr_inodes=1048576,inode64 0 0");
         let munt_points = MountInfo::parse_mtab(&mut file).unwrap();
         assert_eq!(munt_points.len(), 1);
         assert_eq!(munt_points[0].what, "tmpfs".to_owned());
@@ -328,7 +308,7 @@ mod test {
 
     #[test]
     fn test_contains() {
-        let mut file = FakeFile { s: "tmpfs /tmp tmpfs rw,seclabel,nosuid,nodev,size=8026512k,nr_inodes=1048576,inode64 0 0".to_owned(), read: false };
+        let mut file = Cursor::new(b"tmpfs /tmp tmpfs rw,seclabel,nosuid,nodev,size=8026512k,nr_inodes=1048576,inode64 0 0");
         let mtab = MountInfo {
             mounting_points: MountInfo::parse_mtab(&mut file).unwrap(),
         };
@@ -337,7 +317,7 @@ mod test {
 
     #[test]
     fn test_is_mounted() {
-        let mut file = FakeFile { s: "tmpfs /tmp tmpfs rw,seclabel,nosuid,nodev,size=8026512k,nr_inodes=1048576,inode64 0 0".to_owned(), read: false };
+        let mut file = Cursor::new(b"tmpfs /tmp tmpfs rw,seclabel,nosuid,nodev,size=8026512k,nr_inodes=1048576,inode64 0 0");
         let mtab = MountInfo {
             mounting_points: MountInfo::parse_mtab(&mut file).unwrap(),
         };
